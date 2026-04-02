@@ -1,6 +1,7 @@
 """Translation tool using llama.cpp for Hindi to Tamil translation."""
 
 import os
+import shlex
 import subprocess
 import tempfile
 from pathlib import Path
@@ -81,23 +82,28 @@ class TranslateTool:
 
         try:
             shell_cmd = (
-                f'"{llama_bin}"'
-                f' -m "{self._model_path}"'
+                f'{shlex.quote(llama_bin)}'
+                f' -m {shlex.quote(self._model_path)}'
                 f' -c {self._context_size}'
                 f' -t {self._threads}'
                 f' -n {self._max_tokens}'
                 f' --temp 0.1'
-                f' -f "{prompt_file}"'
+                f' -f {shlex.quote(prompt_file)}'
                 f' --no-display-prompt'
                 f' -no-cnv'
-                f' > "{out_path}" 2>/dev/null'
+                f' > {shlex.quote(out_path)} 2>/dev/null'
             )
 
-            subprocess.run(
+            result = subprocess.run(
                 shell_cmd,
                 shell=True,
                 timeout=120,
             )
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"llama.cpp translation failed (exit code {result.returncode})"
+                )
 
             output = Path(out_path).read_text().strip()
         finally:
