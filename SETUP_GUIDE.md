@@ -96,12 +96,14 @@ cmake --build build --config Release -j4
 
 Make it accessible:
 ```bash
-ln -sf ~/llama.cpp/build/bin/llama-cli $PREFIX/bin/llama-cli
+ln -sf ~/llama.cpp/build/bin/llama-completion $PREFIX/bin/llama-completion
 ```
+
+> **Note**: The agent uses `llama-completion` (not `llama-cli`). `llama-cli` does not support `--no-conversation` mode and writes output directly to the terminal, which prevents subprocess capture.
 
 Verify:
 ```bash
-llama-cli --help
+llama-completion --help
 ```
 
 ---
