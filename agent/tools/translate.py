@@ -21,23 +21,14 @@ class TranslateTool:
     def _find_llama_binary(self) -> str:
         """Locate the llama.cpp binary."""
         candidates = [
-            "llama-cli",
-            "llama.cpp/main",
-            "./main",
+            str(Path.home() / "llama.cpp" / "build" / "bin" / "llama-cli"),
             str(Path.home() / "llama.cpp" / "main"),
         ]
         for candidate in candidates:
-            try:
-                result = subprocess.run(
-                    ["which", candidate],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode == 0:
-                    return result.stdout.strip()
-            except FileNotFoundError:
-                continue
+            if Path(candidate).is_file():
+                return candidate
 
+        # Fall back to PATH lookup
         return "llama-cli"
 
     def _build_prompt(self, text: str) -> str:

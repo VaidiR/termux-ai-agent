@@ -66,14 +66,15 @@ pip install -r requirements.txt
 cd ~
 git clone https://github.com/ggerganov/whisper.cpp.git
 cd whisper.cpp
-make -j4 CFLAGS="-O2" CXXFLAGS="-O2"
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j4
 ```
 
 > **OnePlus 13 tip**: You can use `-j4` safely — the Snapdragon 8 Elite has plenty of cores. If Termux gets killed during build (OOM), reduce to `-j2`.
 
 Make it accessible system-wide:
 ```bash
-ln -sf ~/whisper.cpp/main $PREFIX/bin/whisper-cpp
+ln -sf ~/whisper.cpp/build/bin/whisper-cli $PREFIX/bin/whisper-cpp
 ```
 
 Verify:
@@ -89,17 +90,13 @@ whisper-cpp --help
 cd ~
 git clone https://github.com/ggerganov/llama.cpp.git
 cd llama.cpp
-make -j4 CFLAGS="-O2" CXXFLAGS="-O2"
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j4
 ```
 
 Make it accessible:
 ```bash
-# The binary name depends on the llama.cpp version
-if [ -f "llama-cli" ]; then
-    ln -sf ~/llama.cpp/llama-cli $PREFIX/bin/llama-cli
-elif [ -f "main" ]; then
-    ln -sf ~/llama.cpp/main $PREFIX/bin/llama-cli
-fi
+ln -sf ~/llama.cpp/build/bin/llama-cli $PREFIX/bin/llama-cli
 ```
 
 Verify:

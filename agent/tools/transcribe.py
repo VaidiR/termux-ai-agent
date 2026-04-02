@@ -66,23 +66,15 @@ class TranscribeTool:
     def _find_whisper_binary(self) -> str:
         """Locate the whisper.cpp binary."""
         candidates = [
-            "whisper-cpp",
-            "./whisper.cpp/main",
-            "main",
+            str(Path.home() / "whisper.cpp" / "build" / "bin" / "whisper-cli"),
             str(Path.home() / "whisper.cpp" / "main"),
         ]
+        # Check absolute paths first
         for candidate in candidates:
-            try:
-                result = subprocess.run(
-                    ["which", candidate],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode == 0:
-                    return result.stdout.strip()
-            except FileNotFoundError:
-                continue
+            if Path(candidate).is_file():
+                return candidate
 
+        # Fall back to PATH lookup
         return "whisper-cpp"
 
     def run(self, audio_path: str) -> str:

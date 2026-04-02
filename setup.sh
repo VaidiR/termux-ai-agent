@@ -42,20 +42,19 @@ echo "[4/7] Building whisper.cpp..."
 if [ ! -d "$HOME/whisper.cpp" ]; then
     cd "$HOME"
     git clone https://github.com/ggerganov/whisper.cpp.git
-    cd whisper.cpp
-    make -j2 CFLAGS="-O2" CXXFLAGS="-O2"
+fi
+cd "$HOME/whisper.cpp"
+if [ ! -f "build/bin/whisper-cli" ]; then
+    echo "  Building whisper.cpp with CMake..."
+    cmake -B build -DCMAKE_BUILD_TYPE=Release
+    cmake --build build --config Release -j2
 else
-    echo "  whisper.cpp already exists, skipping build"
-    cd "$HOME/whisper.cpp"
-    # Rebuild if binary is missing
-    if [ ! -f "main" ]; then
-        make -j2 CFLAGS="-O2" CXXFLAGS="-O2"
-    fi
+    echo "  whisper.cpp already built, skipping"
 fi
 
 # Make whisper accessible
-if ! command -v whisper-cpp &> /dev/null; then
-    ln -sf "$HOME/whisper.cpp/main" "$PREFIX/bin/whisper-cpp" 2>/dev/null || true
+if [ -f "$HOME/whisper.cpp/build/bin/whisper-cli" ]; then
+    ln -sf "$HOME/whisper.cpp/build/bin/whisper-cli" "$PREFIX/bin/whisper-cpp" 2>/dev/null || true
 fi
 
 # ---- Step 5: Build llama.cpp ----
@@ -63,21 +62,19 @@ echo "[5/7] Building llama.cpp..."
 if [ ! -d "$HOME/llama.cpp" ]; then
     cd "$HOME"
     git clone https://github.com/ggerganov/llama.cpp.git
-    cd llama.cpp
-    make -j2 CFLAGS="-O2" CXXFLAGS="-O2"
+fi
+cd "$HOME/llama.cpp"
+if [ ! -f "build/bin/llama-cli" ]; then
+    echo "  Building llama.cpp with CMake..."
+    cmake -B build -DCMAKE_BUILD_TYPE=Release
+    cmake --build build --config Release -j2
 else
-    echo "  llama.cpp already exists, skipping build"
-    cd "$HOME/llama.cpp"
-    if [ ! -f "llama-cli" ] && [ ! -f "main" ]; then
-        make -j2 CFLAGS="-O2" CXXFLAGS="-O2"
-    fi
+    echo "  llama.cpp already built, skipping"
 fi
 
 # Make llama accessible
-if [ -f "$HOME/llama.cpp/llama-cli" ]; then
-    ln -sf "$HOME/llama.cpp/llama-cli" "$PREFIX/bin/llama-cli" 2>/dev/null || true
-elif [ -f "$HOME/llama.cpp/main" ]; then
-    ln -sf "$HOME/llama.cpp/main" "$PREFIX/bin/llama-cli" 2>/dev/null || true
+if [ -f "$HOME/llama.cpp/build/bin/llama-cli" ]; then
+    ln -sf "$HOME/llama.cpp/build/bin/llama-cli" "$PREFIX/bin/llama-cli" 2>/dev/null || true
 fi
 
 # ---- Step 6: Download models ----
