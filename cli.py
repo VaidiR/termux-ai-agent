@@ -77,7 +77,11 @@ class _Completer:
             line = readline.get_line_buffer().lstrip()
             if " " in line:
                 # Complete file/directory paths after a command
-                self._matches = glob.glob(text + "*")
+                matches = glob.glob(text + "*")
+                # Append '/' to directories so the user can keep tabbing
+                self._matches = [
+                    m + "/" if os.path.isdir(m) else m for m in matches
+                ]
             else:
                 # Complete command names
                 self._matches = [c for c in self.COMMANDS if c.startswith(text)]
@@ -94,6 +98,7 @@ def cmd_interactive(args: argparse.Namespace) -> int:
     # Set up readline for tab completion and history
     completer = _Completer()
     readline.set_completer(completer.complete)
+    readline.set_completer_delims(" \t\n")  # Only split on whitespace, not '/'
     readline.parse_and_bind("tab: complete")
 
     # Persistent history file

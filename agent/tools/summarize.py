@@ -66,6 +66,8 @@ class SummarizeTool:
             "--temp", "0.3",
             "-p", prompt,
             "--no-display-prompt",
+            "--no-conversation",
+            "--log-disable",
         ]
 
         result = subprocess.run(

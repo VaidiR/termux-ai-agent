@@ -66,6 +66,8 @@ class TranslateTool:
             "--temp", "0.1",
             "-p", prompt,
             "--no-display-prompt",
+            "--no-conversation",
+            "--log-disable",
         ]
 
         result = subprocess.run(
