@@ -2,6 +2,9 @@
 """CLI entry point for the Termux AI Agent."""
 
 import argparse
+import glob
+import os
+import readline
 import sys
 from pathlib import Path
 
@@ -61,19 +64,55 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+class _Completer:
+    """Tab completer for interactive mode commands and file paths."""
+
+    COMMANDS = ["process", "batch", "report", "config", "help", "quit", "exit"]
+
+    def __init__(self) -> None:
+        self._matches: list[str] = []
+
+    def complete(self, text: str, state: int) -> str | None:
+        if state == 0:
+            line = readline.get_line_buffer().lstrip()
+            if " " in line:
+                # Complete file/directory paths after a command
+                self._matches = glob.glob(text + "*")
+            else:
+                # Complete command names
+                self._matches = [c for c in self.COMMANDS if c.startswith(text)]
+        if state < len(self._matches):
+            return self._matches[state]
+        return None
+
+
 def cmd_interactive(args: argparse.Namespace) -> int:
     """Start an interactive session."""
     config = Config(args.config)
     agent = Agent(config)
 
+    # Set up readline for tab completion and history
+    completer = _Completer()
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+
+    # Persistent history file
+    history_file = os.path.expanduser("~/.termux_ai_agent_history")
+    try:
+        readline.read_history_file(history_file)
+    except FileNotFoundError:
+        pass
+
     print("Termux AI Agent - Interactive Mode")
-    print("Type 'help' for commands, 'quit' to exit.\n")
+    print("Type 'help' for commands, 'quit' to exit.")
+    print("Tab completion is available for commands and file paths.\n")
 
     while True:
         try:
             user_input = input("agent> ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nGoodbye!")
+            readline.write_history_file(history_file)
             break
 
         if not user_input:
@@ -81,6 +120,7 @@ def cmd_interactive(args: argparse.Namespace) -> int:
 
         if user_input in ("quit", "exit", "q"):
             print("Goodbye!")
+            readline.write_history_file(history_file)
             break
 
         if user_input == "help":
