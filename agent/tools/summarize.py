@@ -111,7 +111,7 @@ class SummarizeTool:
             Path(out_path).unlink(missing_ok=True)
 
         # Clean up any trailing special tokens
-        for token in ["<|end|>", "</s>", "<|assistant|>"]:
+        for token in ["<|end|>", "</s>", "<|assistant|>", "[end of text]"]:
             output = output.replace(token, "")
 
         return output.strip()

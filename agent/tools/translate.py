@@ -41,13 +41,27 @@ class TranslateTool:
         return "llama-completion"
 
     def _build_prompt(self, text: str) -> str:
-        """Build a translation prompt for the LLM."""
+        """Build a translation prompt for the LLM.
+
+        Uses few-shot examples to guide TinyLlama toward Tamil output,
+        since small models tend to default to English without examples.
+        """
         return (
             "<|system|>\n"
-            "You are a translator. Translate the following Hindi text to Tamil. "
-            "Output only the Tamil translation, nothing else.\n"
+            "You are a Hindi to Tamil translator. You MUST output Tamil text "
+            "using Tamil script. Do NOT translate to English. Do NOT explain. "
+            "Output ONLY the Tamil translation.\n"
+            "\n"
+            "Example:\n"
+            "Hindi: yah ek sundar din hai\n"
+            "Tamil: இது ஒரு அழகான நாள்\n"
+            "\n"
+            "Example:\n"
+            "Hindi: mera naam kya hai\n"
+            "Tamil: என் பெயர் என்ன\n"
             "<|user|>\n"
-            f"{text}\n"
+            f"Hindi: {text}\n"
+            "Tamil:\n"
             "<|assistant|>\n"
         )
 
@@ -111,7 +125,7 @@ class TranslateTool:
             Path(out_path).unlink(missing_ok=True)
 
         # Clean up any trailing special tokens
-        for token in ["<|end|>", "</s>", "<|assistant|>"]:
+        for token in ["<|end|>", "</s>", "<|assistant|>", "[end of text]"]:
             output = output.replace(token, "")
 
         return output.strip()
