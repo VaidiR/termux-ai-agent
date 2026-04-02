@@ -1,5 +1,7 @@
 """Summarization tool using llama.cpp for text summarization."""
 
+import os
+import shlex
 import subprocess
 import tempfile
 from pathlib import Path
@@ -71,34 +73,45 @@ class SummarizeTool:
             tmp.write(prompt)
             prompt_file = tmp.name
 
+        # Use a temp file for output capture.
+        # llama.cpp writes generated text directly to the TTY (not stdout),
+        # so subprocess pipe capture gets nothing. Shell-level redirection
+        # to a file is the reliable way to capture the output.
+        out_fd, out_path = tempfile.mkstemp(suffix=".txt")
+        os.close(out_fd)
+
         try:
-            cmd = [
-                llama_bin,
-                "-m", self._model_path,
-                "-c", str(self._context_size),
-                "-t", str(self._threads),
-                "-n", str(self._max_tokens),
-                "--temp", "0.3",
-                "-f", prompt_file,
-                "--no-display-prompt",
-                "-no-cnv",
-                "--log-disable",
-            ]
+            shell_cmd = (
+                f'{shlex.quote(llama_bin)}'
+                f' -m {shlex.quote(self._model_path)}'
+                f' -c {self._context_size}'
+                f' -t {self._threads}'
+                f' -n {self._max_tokens}'
+                f' --temp 0.3'
+                f' -f {shlex.quote(prompt_file)}'
+                f' --no-display-prompt'
+                f' -no-cnv'
+                f' > {shlex.quote(out_path)} 2>/dev/null'
+            )
 
             result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
+                shell_cmd,
+                shell=True,
                 timeout=120,
             )
+
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"llama.cpp summarization failed (exit code {result.returncode})"
+                )
+
+            output = Path(out_path).read_text().strip()
         finally:
             Path(prompt_file).unlink(missing_ok=True)
+            Path(out_path).unlink(missing_ok=True)
 
-        if result.returncode != 0:
-            raise RuntimeError(f"llama.cpp summarization failed: {result.stderr}")
-
-        output = result.stdout.strip()
-        for token in ["<|end|>", "</s>", "<|assistant|>"]:
+        # Clean up any trailing special tokens
+        for token in ["<|end|>", "</s>", "<|assistant|>", "[end of text]"]:
             output = output.replace(token, "")
 
         return output.strip()
