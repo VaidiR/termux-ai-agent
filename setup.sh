@@ -32,7 +32,9 @@ pkg install -y \
 
 # ---- Step 3: Install Python dependencies ----
 echo "[3/7] Installing Python dependencies..."
-pip install --upgrade pip
+# Note: Do NOT run 'pip install --upgrade pip' on Termux — it is
+# managed by the system package manager and upgrading it will fail.
+pkg install -y python-pip 2>/dev/null || true
 pip install -r "$SCRIPT_DIR/requirements.txt"
 
 # ---- Step 4: Build whisper.cpp ----

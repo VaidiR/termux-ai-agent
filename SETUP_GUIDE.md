@@ -54,7 +54,7 @@ cd termux-ai-agent
 ## Step 4: Install Python Dependencies
 
 ```bash
-pip install --upgrade pip
+# Do NOT run 'pip install --upgrade pip' — Termux manages pip via pkg
 pip install -r requirements.txt
 ```
 
