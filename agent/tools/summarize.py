@@ -66,7 +66,7 @@ class SummarizeTool:
             "--temp", "0.3",
             "-p", prompt,
             "--no-display-prompt",
-            "--no-conversation",
+            "--single-turn",
             "--log-disable",
         ]
 
