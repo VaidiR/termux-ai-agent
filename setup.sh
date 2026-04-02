@@ -64,7 +64,7 @@ if [ ! -d "$HOME/llama.cpp" ]; then
     git clone https://github.com/ggerganov/llama.cpp.git
 fi
 cd "$HOME/llama.cpp"
-if [ ! -f "build/bin/llama-cli" ]; then
+if [ ! -f "build/bin/llama-completion" ]; then
     echo "  Building llama.cpp with CMake..."
     cmake -B build -DCMAKE_BUILD_TYPE=Release
     cmake --build build --config Release -j2
@@ -72,9 +72,11 @@ else
     echo "  llama.cpp already built, skipping"
 fi
 
-# Make llama accessible
-if [ -f "$HOME/llama.cpp/build/bin/llama-cli" ]; then
-    ln -sf "$HOME/llama.cpp/build/bin/llama-cli" "$PREFIX/bin/llama-cli" 2>/dev/null || true
+# Make llama accessible (use llama-completion, not llama-cli)
+# llama-cli does not support --no-conversation and writes output
+# directly to the TTY, making subprocess capture impossible.
+if [ -f "$HOME/llama.cpp/build/bin/llama-completion" ]; then
+    ln -sf "$HOME/llama.cpp/build/bin/llama-completion" "$PREFIX/bin/llama-completion" 2>/dev/null || true
 fi
 
 # ---- Step 6: Download models ----
