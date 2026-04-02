@@ -1,0 +1,14 @@
+whisper:
+  model_path: "models/ggml-tiny.bin"
+  language: "hi"
+  threads: 2
+
+llm:
+  model_path: "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+  context_size: 512
+  threads: 2
+  max_tokens: 256
+
+agent:
+  max_steps: 10
+  csv_path: "data/tracking.csv"

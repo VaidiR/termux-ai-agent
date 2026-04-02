@@ -1,0 +1,35 @@
+# Models (too large for git)
+models/
+*.bin
+*.gguf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Data outputs
+data/*.csv
+!data/.gitkeep
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp audio
+*.wav
